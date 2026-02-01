@@ -1,0 +1,42 @@
+---
+import { createClient } from "@supabase/supabase-js";
+import LayoutPrivate from "../layouts/LayoutPrivate.astro";
+import NavigationBar from "../components/NavigationBar.astro";
+import GeneratorForm from "../components/GeneratorForm.astro";
+
+// Server-side logic
+const supabase = createClient(
+  import.meta.env.SUPABASE_URL,
+  import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
+);
+
+const { data: { user } } = await supabase.auth.getUser(Astro.cookies.get("sb-access-token")?.value);
+
+if (!user) {
+  return Astro.redirect("/login");
+}
+
+const { data: userMmsCount, error: rpcError } = await supabase.rpc(
+  "count_user_mms_today",
+  { p_user_id: user.id },
+);
+
+if (rpcError) {
+  console.error("Error calling RPC:", rpcError);
+  // Handle error appropriately, maybe show an error page
+}
+
+const isLimitReached = (userMmsCount ?? 0) >= 5;
+---
+
+<LayoutPrivate title="Generator - funnyMMS" user={user}>
+  <NavigationBar />
+  <main class="container mx-auto max-w-2xl p-4">
+    <div class="mt-8">
+      <div id="notification-area">
+        {isLimitReached && <div class="alert alert-warning">Osiągnięto dzienny limit 5 MMS. Spróbuj ponownie jutro.</div>}
+      </div>
+      <GeneratorForm isSubmitDisabled={isLimitReached} />
+    </div>
+  </main>
+</LayoutPrivate>
