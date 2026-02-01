@@ -1,0 +1,18 @@
+---
+import type { ProfileDto, MmsHistoryDto } from "../types";
+import ProfileSection from "./ProfileSection.astro";
+import HistorySection from "./HistorySection.astro";
+
+interface Props {
+  profile: ProfileDto;
+  initialHistory: MmsHistoryDto[];
+  nextPageOffset: number | null;
+}
+
+const { profile, initialHistory, nextPageOffset } = Astro.props;
+---
+
+<div class="mt-8">
+  <ProfileSection profile={profile} />
+  <HistorySection initialHistory={initialHistory} nextPageOffset={nextPageOffset} />
+</div>

@@ -1,0 +1,53 @@
+---
+import { createClient } from "@supabase/supabase-js";
+import LayoutPrivate from "../layouts/LayoutPrivate.astro";
+import NavigationBar from "../components/NavigationBar.astro";
+import ProfileView from "../components/ProfileView.astro";
+import type { ProfileDto, MmsHistoryDto } from "../types";
+
+// Server-side logic
+const supabase = createClient(
+  import.meta.env.SUPABASE_URL,
+  import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
+);
+
+const { data: { user } } = await supabase.auth.getUser(Astro.cookies.get("sb-access-token")?.value);
+
+if (!user) {
+  return Astro.redirect("/login");
+}
+
+const PAGE_SIZE = 12;
+
+// Fetch profile and initial history in parallel
+const [profileResponse, historyResponse] = await Promise.all([
+  supabase.from("profiles").select("*").eq("id", user.id).single<ProfileDto>(),
+  supabase
+    .from("mms_history")
+    .select("id, prompt, status, model_info, created_at")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(PAGE_SIZE),
+]);
+
+if (profileResponse.error || !profileResponse.data) {
+  console.error("Error fetching profile:", profileResponse.error);
+  return new Response("Could not load profile data.", { status: 500 });
+}
+
+const initialHistory: MmsHistoryDto[] = historyResponse.data ?? [];
+const nextPageOffset = initialHistory.length === PAGE_SIZE ? PAGE_SIZE : null;
+
+const viewModel = {
+  profile: profileResponse.data,
+  initialHistory,
+  nextPageOffset,
+};
+---
+
+<LayoutPrivate title="Profil - funnyMMS" user={user}>
+  <NavigationBar />
+  <main class="container mx-auto max-w-5xl px-4">
+    <ProfileView {...viewModel} />
+  </main>
+</LayoutPrivate>

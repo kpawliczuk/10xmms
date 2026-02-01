@@ -1,0 +1,14 @@
+---
+import type { MmsHistoryDto } from "../types";
+import HistoryItem from "./HistoryItem.astro";
+
+interface Props {
+  historyItems: MmsHistoryDto[];
+}
+
+const { historyItems } = Astro.props;
+---
+
+<div id="history-grid" class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+  {historyItems.map((item) => <HistoryItem item={item} />)}
+</div>

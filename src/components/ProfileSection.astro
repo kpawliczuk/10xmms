@@ -1,0 +1,19 @@
+---
+import type { ProfileDto } from "../types";
+
+interface Props {
+  profile: ProfileDto;
+}
+
+const { profile } = Astro.props;
+
+// Mask the phone number, showing only the first few and last few digits
+const maskedPhone = profile.phone_number
+  ? `${profile.phone_number.slice(0, 4)}...${profile.phone_number.slice(-4)}`
+  : "Brak numeru";
+---
+
+<section class="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+  <h2 class="text-2xl font-bold text-slate-900">Witaj, {profile.username || "Użytkowniku"}!</h2>
+  <p class="mt-2 text-slate-600">Twój zweryfikowany numer telefonu: <strong>{maskedPhone}</strong></p>
+</section>
