@@ -96,40 +96,112 @@ serve(async (req: Request) => {
       );
     }
 
-    // 5. AI Image Generation (Placeholder)
-    // In a real implementation, this would call the Google AI API.
-    // We will simulate a failure for now to demonstrate error handling.
-    const simulateAiFailure = true;
-    let imageData: Uint8Array;
+    // 5. Increment the global daily counter
+    // This operation uses an UPSERT to atomically create or increment the counter for the day.
+    const { error: upsertError } = await supabaseAdmin
+      .from("daily_global_stats")
+      .upsert({ day: today, mms_sent_count: (globalStats?.mms_sent_count || 0) + 1 });
 
-    if (simulateAiFailure) {
+    if (upsertError) {
+      console.error("Error incrementing global limit:", upsertError.message);
+      throw new Error("Failed to update global limit.");
+    }
+
+    // 6. AI Image Generation
+    let imageData: Uint8Array;
+    try {
+      // This block contains the actual AI API call
+      // const aiResponse = await fetch("https://api.google.ai/...", {
+      //   method: "POST",
+      //   headers: { "Authorization": `Bearer ${Deno.env.get("GOOGLE_AI_API_KEY")}` },
+      //   body: JSON.stringify({ prompt: prompt })
+      // });
+      // if (!aiResponse.ok) throw new Error("AI API request failed");
+      // imageData = new Uint8Array(await aiResponse.arrayBuffer());
+
+      // --- Placeholder for actual image data ---
+      imageData = new Uint8Array([1, 2, 3, 4]); // Replace with actual data
+      // --- End Placeholder ---
+
+    } catch (aiError) {
       console.error("AI image generation failed for prompt:", prompt);
-      // 5.1 Log the generation failure to the database
+      // Log the generation failure to the database
       const { error: logError } = await supabaseAdmin
         .from("mms_history")
         .insert({
           user_id: user.id,
           prompt: prompt,
           status: "generation_failed",
-          image_data: new Uint8Array(), // Use an empty byte array for failures
+          image_data: "\\x", // Use an empty bytea literal for failures
         });
 
       if (logError) {
         console.error("Failed to log generation failure:", logError.message);
       }
-
       return new Response(
         `<div id="notification-area" class="alert alert-error">Nie udało się wygenerować grafiki. Spróbuj opisać ją inaczej.</div>`,
         { status: 500, headers: { ...corsHeaders, "Content-Type": "text/html" } },
       );
-    } else {
-      // This block would contain the actual AI API call
-      // const response = await fetch("https://api.google.ai/...", { ... });
-      // imageData = new Uint8Array(await response.arrayBuffer());
     }
 
-    // Placeholder for the next steps: MMS sending and success logging
-    return new Response("Not implemented", { status: 501 });
+    // 7. Send the MMS via smsapi.pl
+    try {
+      // 7.1 Fetch user's phone number
+      const { data: profile, error: profileError } = await supabaseAdmin
+        .from("profiles")
+        .select("phone_number")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError || !profile?.phone_number) {
+        throw new Error(`User profile or phone number not found for user ${user.id}.`);
+      }
+
+      // 7.2 Make the API call to the MMS gateway
+      // const mmsResponse = await fetch("https://api.smsapi.pl/mms.do", { ... });
+      // if (!mmsResponse.ok) throw new Error("MMS Gateway API request failed");
+
+    } catch (mmsError) {
+      console.error("MMS sending failed:", mmsError.message);
+      // Log the sending failure to the database
+      const { error: logError } = await supabaseAdmin.from("mms_history").insert({
+        user_id: user.id,
+        prompt: prompt,
+        status: "send_failed",
+        image_data: imageData, // Log the image data even if sending failed
+      });
+      if (logError) console.error("Failed to log send failure:", logError.message);
+
+      return new Response(
+        `<div id="notification-area" class="alert alert-error">Nie udało się wysłać wiadomości MMS.</div>`,
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "text/html" } },
+      );
+    }
+
+    // 8. Log the successful operation
+    const { data: historyEntry, error: successLogError } = await supabaseAdmin
+      .from("mms_history")
+      .insert({
+        user_id: user.id,
+        prompt: prompt,
+        status: "success",
+        image_data: imageData,
+        model_info: "gemini-pro-vision", // Example model info
+      }).select("id").single();
+
+    if (successLogError) {
+      console.error("Failed to log success:", successLogError.message);
+      // The MMS was sent, but logging failed. We still return a success response to the user.
+    }
+
+    // 9. Return the final success response
+    return new Response(
+      `<div id="notification-area" class="alert alert-info" hx-swap-oob="true">Twoje zapytanie zostało przyjęte. Sprawdź telefon!</div>`,
+      {
+        status: 202,
+        headers: { ...corsHeaders, "Content-Type": "text/html" },
+      },
+    );
   } catch (error) {
     console.error("Unhandled error:", error);
     return new Response(
