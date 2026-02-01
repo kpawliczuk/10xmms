@@ -1,9 +1,18 @@
 ---
 import LayoutPublic from "../layouts/LayoutPublic.astro";
 import HeaderPublic from "../components/HeaderPublic.astro";
+import HeroSection from "../components/HeroSection.astro";
+import ExampleUsage from "../components/ExampleUsage.astro";
+import FooterPublic from "../components/FooterPublic.astro";
 ---
 
 <LayoutPublic title="funnyMMS - Generator śmiesznych MMS">
-  <HeaderPublic />
-  <!-- Pozostałe komponenty zostaną dodane w kolejnych krokach -->
+  <div class="container mx-auto max-w-3xl p-4">
+    <HeaderPublic />
+    <main class="mt-8">
+      <HeroSection />
+      <ExampleUsage imageUrl="https://placehold.co/400x300/orange/white?text=AI+Image" promptText="Latający słoń w stroju baletnicy" />
+    </main>
+    <FooterPublic />
+  </div>
 </LayoutPublic>

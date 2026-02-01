@@ -1,0 +1,18 @@
+---
+interface Props {
+  imageUrl: string;
+  promptText: string;
+}
+
+const { imageUrl, promptText } = Astro.props;
+---
+
+<section class="mt-8 text-center">
+  <h2 class="text-xl font-semibold">Zobacz, jakie to proste!</h2>
+  <div class="mt-4 inline-block rounded-lg border p-4 shadow-md">
+    <img src={imageUrl} alt="Przykładowa grafika wygenerowana przez AI" class="mx-auto max-w-xs rounded" />
+    <blockquote class="mt-2 border-l-4 border-gray-300 pl-4 italic text-gray-600">
+      {promptText}
+    </blockquote>
+  </div>
+</section>
