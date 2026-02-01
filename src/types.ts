@@ -1,6 +1,15 @@
 import type { Enums, Tables, TablesInsert, TablesUpdate } from "./db/database.types";
 
 /**
+ * Represents the command for a user login request.
+ * This is a ViewModel used for the login form.
+ */
+export type LoginCommand = {
+  email: string;
+  password: string;
+};
+
+/**
  * Represents the public profile data of a user.
  * This type directly maps to the `profiles` table row in the database.
  */
@@ -12,6 +21,26 @@ export type ProfileDto = Tables<"profiles">;
  * that can be modified through the API.
  */
 export type UpdateProfileCommand = Pick<TablesUpdate<"profiles">, "username">;
+
+/**
+ * Represents the command for a user registration request.
+ */
+export type RegisterCommand = {
+  email: string;
+  password: string;
+  passwordConfirm: string;
+  phone: string;
+  termsAccepted: "on" | undefined;
+};
+
+/**
+ * Represents the command for verifying a one-time password (OTP).
+ */
+export type VerifyOtpCommand = {
+  token: string;
+  phone: string;
+  type: "sms" | "phone_change";
+};
 
 /**
  * Represents the command for initiating the MMS generation process.

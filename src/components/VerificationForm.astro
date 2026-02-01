@@ -1,0 +1,41 @@
+---
+interface Props {
+  phone: string;
+  type: "sms" | "phone_change";
+  message: string;
+}
+
+const { phone, type, message } = Astro.props;
+---
+
+<div class="mx-auto max-w-md">
+  <div class="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+    <h2 class="text-2xl font-bold text-slate-900">Weryfikacja</h2>
+    <p class="mt-2 text-slate-600">{message}</p>
+
+    <form
+      class="mt-8 space-y-6"
+      hx-post="/functions/v1/auth-verify"
+      hx-target="#notification-area"
+      hx-swap="innerHTML"
+    >
+      <div id="notification-area">
+        <!-- Komunikaty o błędach z serwera pojawią się tutaj -->
+      </div>
+
+      <input type="hidden" name="phone" value={phone} />
+      <input type="hidden" name="type" value={type} />
+
+      <div>
+        <label for="token" class="block text-sm font-medium text-slate-700">6-cyfrowy kod</label>
+        <input id="token" name="token" type="text" inputmode="numeric" required pattern="[0-9]{6}" maxlength="6" class="mt-1 block w-full rounded-md border-slate-300 text-center text-2xl tracking-widest shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+      </div>
+
+      <div>
+        <button type="submit" class="flex w-full justify-center rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white shadow-md transition-transform hover:scale-105 hover:bg-blue-700">
+          Weryfikuj
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

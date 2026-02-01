@@ -1,0 +1,18 @@
+---
+import LayoutPublic from "../layouts/LayoutPublic.astro";
+import HeaderPublic from "../components/HeaderPublic.astro";
+import VerificationForm from "../components/VerificationForm.astro";
+import FooterPublic from "../components/FooterPublic.astro";
+
+const phone = Astro.url.searchParams.get("phone");
+---
+
+<LayoutPublic title="Weryfikacja Telefonu - funnyMMS">
+  <div class="container mx-auto max-w-4xl px-4">
+    <HeaderPublic />
+    <main class="mt-8">
+      <VerificationForm phone={phone} type="sms" message={`Wysłaliśmy kod weryfikacyjny na Twój numer telefonu: ${phone}`} />
+    </main>
+    <FooterPublic />
+  </div>
+</LayoutPublic>
