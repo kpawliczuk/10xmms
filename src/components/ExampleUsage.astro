@@ -7,11 +7,11 @@ interface Props {
 const { imageUrl, promptText } = Astro.props;
 ---
 
-<section class="mt-8 text-center">
-  <h2 class="text-xl font-semibold">Zobacz, jakie to proste!</h2>
-  <div class="mt-4 inline-block rounded-lg border p-4 shadow-md">
-    <img src={imageUrl} alt="Przykładowa grafika wygenerowana przez AI" class="mx-auto max-w-xs rounded" />
-    <blockquote class="mt-2 border-l-4 border-gray-300 pl-4 italic text-gray-600">
+ <section class="mt-16 text-center">
+   <h2 class="text-2xl font-semibold text-slate-800">Zobacz, jakie to proste!</h2>
+   <div class="mt-6 inline-block rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+     <img src={imageUrl} alt="Przykładowa grafika wygenerowana przez AI" class="mx-auto max-w-xs rounded-lg" />
+     <blockquote class="mt-4 border-l-4 border-slate-300 pl-4 italic text-slate-500">
       {promptText}
     </blockquote>
   </div>
