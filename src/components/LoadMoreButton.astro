@@ -11,8 +11,8 @@ const PAGE_SIZE = 12;
   <button
     class="transform rounded-lg bg-slate-200 px-7 py-3 font-semibold text-slate-800 transition-transform hover:scale-105 hover:bg-slate-300"
     hx-get={`/functions/v1/history-items?limit=${PAGE_SIZE}&offset=${nextOffset}`}
-    hx-target="#load-more-container"
-    hx-swap="outerHTML"
+    hx-target="#history-grid"
+    hx-swap="beforeend"
   >
     Załaduj więcej
   </button>

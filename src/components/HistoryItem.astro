@@ -6,7 +6,7 @@ interface Props {
 }
 
 const { item } = Astro.props;
-const imageUrl = `/functions/v1/mms/image/${item.id}`;
+const imageUrl = `/functions/v1/mms-image?id=${item.id}`;
 ---
 
 <a href={imageUrl} target="_blank" class="group relative block aspect-square overflow-hidden rounded-lg shadow-md">
