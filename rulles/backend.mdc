@@ -1,0 +1,35 @@
+---
+description: Zasady projektowania aplikacji przy użyciu HTMX jako frontendu oraz Supabase (PostgREST) jako backendu.
+globs: ["**/*.html", "**/*.sql", "**/server/**"]
+---
+
+# HTMX & Supabase Development Rules
+
+Jesteś ekspertem w budowaniu aplikacji typu **Locality of Behavior (LoB)**, używając HTMX do interakcji oraz Supabase jako warstwy danych i autentykacji.
+
+## 1. Architektura Odpowiedzi (HATEOAS)
+* **Backend NIE zwraca JSON-a.** Każdy endpoint API musi zwracać fragmenty HTML (`<div>...</div>`, `<li>...</li>`), a nie surowe dane.
+* Wykorzystuj nagłówki `HX-Trigger` do wywoływania zdarzeń po stronie klienta (np. odświeżenie innej części strony).
+* Stosuj `hx-swap="outerHTML"` dla aktualizacji elementów i `hx-swap="beforeend"` dla list.
+
+## 2. Integracja z Supabase
+* **Bezpośrednie API (PostgREST):** Jeśli używamy bezpośredniego API Supabase, konfiguruj odpowiedzi tak, aby były renderowane przez lekki serwer pośredniczący (np. Edge Functions), który transformuje JSON z bazy na HTML.
+* **RLS (Row Level Security):** Zawsze zakładaj, że RLS jest włączony. Każde zapytanie musi uwzględniać token użytkownika (JWT) przekazywany w nagłówkach HTMX (`hx-headers`).
+* **Logika w SQL:** Preferuj przenoszenie logiki biznesowej do funkcji PostgreSQL (RPC) lub Triggerów, zamiast procesowania danych w warstwie serwera pośredniczącego.
+
+## 3. Standardy HTML & HTMX
+* **Brak nadmiarowego JS:** Zanim zaproponujesz skrypt w JavaScript, sprawdź, czy można to osiągnąć za pomocą atrybutów HTMX (np. `hx-confirm`, `hx-boost`).
+* **Wskaźniki ładowania:** Każda akcja `hx-post/get` powinna mieć zdefiniowany `hx-indicator` lub wizualny feedback (klasa `.htmx-request`).
+* **Identyfikatory:** Używaj semantycznych ID dla celów `hx-target` (np. `id="todo-list-container"`).
+
+## 4. Wytyczne dla SQL (Supabase)
+* Twórz tabele z automatycznymi znacznikami czasu `created_at` i `updated_at`.
+* Zawsze generuj plik migracji lub skrypt SQL przy zmianach w strukturze bazy.
+* Pamiętaj o politykach `CREATE POLICY` dla ról `authenticated` i `anon`.
+
+## 5. Przykładowa Struktura Komponentu (HTML Fragment)
+Zamiast JSON `{ "status": "success" }`, zwracaj:
+```html
+<div class="alert alert-success" hx-get="/refresh-count" hx-trigger="load" hx-target="#counter">
+    Pomyślnie zaktualizowano bazę danych!
+</div>
