@@ -1,0 +1,11 @@
+---
+interface Props {
+  initialMessage?: string;
+}
+
+const { initialMessage } = Astro.props;
+---
+
+<div id="notification-area">
+  {initialMessage && <div class="alert alert-warning">{initialMessage}</div>}
+</div>

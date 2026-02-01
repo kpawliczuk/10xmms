@@ -1,0 +1,16 @@
+---
+import NotificationArea from "./NotificationArea.astro";
+import GeneratorForm from "./GeneratorForm.astro";
+
+interface Props {
+  isLimitReached: boolean;
+}
+
+const { isLimitReached } = Astro.props;
+const initialMessage = isLimitReached ? "Osiągnięto dzienny limit 5 MMS. Spróbuj ponownie jutro." : undefined;
+---
+
+<div class="mt-8">
+  <NotificationArea initialMessage={initialMessage} />
+  <GeneratorForm isSubmitDisabled={isLimitReached} />
+</div>
